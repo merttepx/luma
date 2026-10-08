@@ -54,7 +54,25 @@ jobs:
             git push origin $tag
           }
 
-      - name: Build and publish the Windows installer and update manifest
-        run: pnpm run release:win
+      - name: Build the Windows installer and updater manifest
+        run: pnpm run build:win
+
+      - name: Publish all release files together
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $installer = "installer/Luma-Chat-Setup-$version.exe"
+          $blockmap = "$installer.blockmap"
+          $manifest = "installer/latest.yml"
+          foreach ($file in @($installer, $blockmap, $manifest)) {
+            if (-not (Test-Path -LiteralPath $file)) { throw "Release file is missing: $file" }
+          }
+          $releases = gh api "repos/merttepx/luma/releases?per_page=100" | ConvertFrom-Json
+          foreach ($release in @($releases | Where-Object { $_.tag_name -eq $tag })) {
+            gh api --method DELETE "repos/merttepx/luma/releases/$($release.id)"
+            if ($LASTEXITCODE -ne 0) { throw "Could not replace existing release $($release.id)." }
+          }
+          gh release create $tag $installer $blockmap $manifest --title "Luma Chat $version" --notes "Luma Chat $version for Windows. All installer and update metadata files are published together."
