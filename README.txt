@@ -1,6 +1,6 @@
 Luma Chat — Windows desktop app
 
-Install with Luma-Chat-Setup-1.0.6.exe. The per-user NSIS installer adds
+Install with Luma-Chat-Setup-1.0.7.exe. The per-user NSIS installer adds
 Start menu and desktop shortcuts.
 
 What works in this desktop preview
