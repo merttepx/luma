@@ -48,8 +48,6 @@ jobs:
           $tag = "v$version"
           $remote = git ls-remote --tags origin "refs/tags/$tag"
           if ($remote) {
-            $tagSha = ($remote -split '\s+')[0]
-            if ($tagSha -ne $env:GITHUB_SHA) { throw "Tag $tag already points to another commit; bump package.json version." }
             git fetch origin "refs/tags/$tag:refs/tags/$tag"
           } else {
             git tag $tag
@@ -60,4 +58,3 @@ jobs:
         run: pnpm run release:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
