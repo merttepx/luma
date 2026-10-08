@@ -1,0 +1,47 @@
+name: Publish Luma Chat release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: luma-windows-release
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate version when triggered by a tag
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw "Release tag must be v$version" }
+
+      - name: Build and publish the Windows installer and update manifest
+        run: pnpm run release:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

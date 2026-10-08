@@ -1,0 +1,60 @@
+{
+  "name": "luma-desktop",
+  "version": "1.0.4",
+  "description": "A desktop chat app concept",
+  "main": "main.cjs",
+  "author": "Luma",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/merttepx/luma.git"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis --publish never",
+    "release:win": "electron-builder --win nsis --publish always"
+  },
+  "devDependencies": {
+    "electron": "44.6.0",
+    "electron-builder": "26.15.3"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
+  },
+  "build": {
+    "appId": "app.luma.chat",
+    "productName": "Luma Chat",
+    "asar": true,
+    "directories": {
+      "output": "installer"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "luma-chat.html",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Luma-Chat-Setup-${version}.${ext}",
+      "verifyUpdateCodeSignature": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "merttepx",
+        "repo": "luma",
+        "releaseType": "release"
+      }
+    ],
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
