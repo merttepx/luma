@@ -40,7 +40,24 @@ jobs:
           $version = node -p "require('./package.json').version"
           if ($env:GITHUB_REF_NAME -ne "v$version") { throw "Release tag must be v$version" }
 
+      - name: Create or validate the version tag for branch releases
+        if: github.ref_type == 'branch'
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $remote = git ls-remote --tags origin "refs/tags/$tag"
+          if ($remote) {
+            $tagSha = ($remote -split '\s+')[0]
+            if ($tagSha -ne $env:GITHUB_SHA) { throw "Tag $tag already points to another commit; bump package.json version." }
+            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          } else {
+            git tag $tag
+            git push origin $tag
+          }
+
       - name: Build and publish the Windows installer and update manifest
         run: pnpm run release:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
