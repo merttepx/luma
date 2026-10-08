@@ -48,7 +48,7 @@ jobs:
           $tag = "v$version"
           $remote = git ls-remote --tags origin "refs/tags/$tag"
           if ($remote) {
-            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            git fetch origin "refs/tags/${tag}:refs/tags/${tag}"
           } else {
             git tag $tag
             git push origin $tag
